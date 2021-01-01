@@ -1,5 +1,3 @@
-import java.io.File
-
 class RpnParserException(message: String) : Exception(message)
 
 @Throws(RpnParserException::class)
@@ -23,7 +21,7 @@ fun rpnCalculate(rpnIn: MutableList<String>, previous: List<Double>? = null): Mu
             continue@nextToken
         }
         if (trace) println("Trace > ${rpnIn}, token=\"$token\", $rv")
-        var numIn = token.toDoubleOrNull()
+        val numIn = token.toDoubleOrNull()
         if (numIn != null) rv.add(numIn)
         else if ("^[+\\-*/]$".toRegex().matches(token)) {
             if (rv.size >= 2) {
@@ -31,6 +29,7 @@ fun rpnCalculate(rpnIn: MutableList<String>, previous: List<Double>? = null): Mu
                 val rVal = rv.removeLast()
                 rv.add(
                     when (token) {
+                        "+" -> rVal + lVal
                         "+" -> rVal + lVal
                         "-" -> rVal - lVal
                         "*" -> rVal * lVal
@@ -41,6 +40,7 @@ fun rpnCalculate(rpnIn: MutableList<String>, previous: List<Double>? = null): Mu
             }
             else throw RpnParserException("Stack underflow at $token")
         }
+        else throw RpnParserException("unrecognized token:\"$token\"")
         if (trace) println("Trace < ${rpnIn}, $rv")
     }
     return rv
@@ -56,6 +56,7 @@ fun main() {
         print("> ")
         lineIn = readLine()
         if (lineIn != null) {
+            if (lineIn == "q") System.exit(0)
             try {
                 println("${rpnCalculate(lineIn)}")
             }
